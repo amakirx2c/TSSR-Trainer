@@ -15,8 +15,14 @@ export default function Home() {
 }, []);
 
   async function loginWithGoogle() {
+  try {
     const result = await signInWithPopup(auth, googleProvider);
     setUser(result.user);
+  } catch (error) {
+    console.error("Erreur connexion Google :", error);
+    alert("Erreur connexion Google. Regarde la console avec F12.");
+  }
+}
   }
 
   async function logout() {
