@@ -23,8 +23,7 @@ export default function Home() {
     alert("Erreur connexion Google. Regarde la console avec F12.");
   }
 }
-  }
-
+  
   async function logout() {
     await signOut(auth);
     setUser(null);
