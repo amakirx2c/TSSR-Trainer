@@ -3,6 +3,7 @@
 import { onAuthStateChanged, signInWithPopup, signOut, User } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { auth, googleProvider } from "../lib/firebase";
+import Link from "next/link";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -51,7 +52,12 @@ export default function Home() {
           </p>
 
           <div className="flex gap-4 justify-center mb-6">
-            <button className="bg-blue-600 px-6 py-3 rounded-lg">Cisco</button>
+           <Link
+  href="/cisco"
+  className="bg-blue-600 px-6 py-3 rounded-lg"
+>
+  Cisco
+</Link>
             <button className="bg-green-600 px-6 py-3 rounded-lg">Linux</button>
             <button className="bg-purple-600 px-6 py-3 rounded-lg">Windows</button>
           </div>
