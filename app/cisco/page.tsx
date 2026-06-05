@@ -416,6 +416,10 @@ export default function CiscoPage() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
+  const [examMode, setExamMode] = useState(false);
+const [examScore, setExamScore] = useState(0);
+const [examAnswered, setExamAnswered] = useState(0);
+const [examFinished, setExamFinished] = useState(false);
 
   const exercises =
     selectedTheme === "extended" ? extendedAclExercises : standardAclExercises;
@@ -433,6 +437,9 @@ export default function CiscoPage() {
       const newStreak = streak + 1;
       setXp(xp + 10);
       setCorrectAnswers(correctAnswers + 1);
+      if (examMode) {
+  setExamScore(examScore + 1);
+}
       setStreak(newStreak);
 
       if (newStreak > bestStreak) {
@@ -446,8 +453,39 @@ export default function CiscoPage() {
       setResult("❌ Réponse incorrecte. Série remise à zéro.");
       setShowCorrection(true);
     }
-  }
+    if (examMode) {
+  const newAnswered = examAnswered + 1;
 
+  setExamAnswered(newAnswered);
+
+  if (newAnswered >= 10) {
+    setExamFinished(true);
+  }
+}
+  }
+function startExam() {
+  setExamMode(true);
+  setExamScore(0);
+  setExamAnswered(0);
+  setExamFinished(false);
+
+  setAnswer("");
+  setResult("");
+  setShowCorrection(false);
+
+  const randomIndex = Math.floor(
+    Math.random() * exercises.length
+  );
+
+  setCurrentIndex(randomIndex);
+}
+
+function stopExam() {
+  setExamMode(false);
+  setExamFinished(false);
+  setExamScore(0);
+  setExamAnswered(0);
+}
   function nextExercise() {
     setAnswer("");
     setResult("");
@@ -508,8 +546,23 @@ export default function CiscoPage() {
             <p className="text-sm text-slate-200">20 exercices</p>
           </button>
         </section>
-
+        <div className="text-center mb-8">
+  <button
+    onClick={startExam}
+    className="bg-red-600 hover:bg-red-700 px-8 py-4 rounded-xl font-bold"
+  >
+    🎯 Lancer le Mode Examen
+  </button>
+</div>
         <section className="bg-slate-800 p-8 rounded-2xl border border-slate-700 mx-auto max-w-3xl">
+          {examMode && (
+  <div className="mb-5 bg-red-950 border border-red-500 p-4 rounded-xl text-center">
+    <p className="font-bold text-lg">🎯 Mode Examen</p>
+    <p>
+      Question {examAnswered + 1} / 10 | Score : {examScore} / 10
+    </p>
+  </div>
+)}
           <div className="flex justify-between mb-4">
             <p className="text-slate-400">
               Question {currentIndex + 1} / {exercises.length}
@@ -540,6 +593,26 @@ export default function CiscoPage() {
               {result}
             </div>
           )}
+          {examFinished && (
+  <div className="mt-5 bg-slate-900 border border-red-500 p-5 rounded-xl text-center">
+    <h3 className="text-2xl font-bold mb-3">Résultat Examen</h3>
+
+    <p className="text-xl mb-2">
+      Score : {examScore} / 10
+    </p>
+
+    <p className="text-xl mb-4">
+      {examScore >= 7 ? "✅ Examen réussi" : "❌ Examen échoué"}
+    </p>
+
+    <button
+      onClick={stopExam}
+      className="bg-slate-600 hover:bg-slate-700 px-6 py-3 rounded-lg font-semibold"
+    >
+      Quitter le mode examen
+    </button>
+  </div>
+)}
 
           {showCorrection && (
             <div className="mt-5 bg-slate-900 border border-amber-500 p-4 rounded-lg">
