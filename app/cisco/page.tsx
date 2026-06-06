@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type Exercise = {
   title: string;
@@ -420,6 +420,25 @@ export default function CiscoPage() {
 const [examScore, setExamScore] = useState(0);
 const [examAnswered, setExamAnswered] = useState(0);
 const [examFinished, setExamFinished] = useState(false);
+const [timeLeft, setTimeLeft] = useState(900);
+const [timerRunning, setTimerRunning] = useState(false);
+useEffect(() => {
+  if (!timerRunning) return;
+
+  const timer = setInterval(() => {
+    setTimeLeft((prev) => {
+      if (prev <= 1) {
+        setTimerRunning(false);
+        setExamFinished(true);
+        return 0;
+      }
+
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [timerRunning]);
 
   const exercises =
     selectedTheme === "extended" ? extendedAclExercises : standardAclExercises;
@@ -459,8 +478,9 @@ const [examFinished, setExamFinished] = useState(false);
   setExamAnswered(newAnswered);
 
   if (newAnswered >= 10) {
-    setExamFinished(true);
-  }
+  setExamFinished(true);
+  setTimerRunning(false);
+}
 }
   }
 function startExam() {
@@ -468,6 +488,8 @@ function startExam() {
   setExamScore(0);
   setExamAnswered(0);
   setExamFinished(false);
+  setTimeLeft(900);
+setTimerRunning(true);
 
   setAnswer("");
   setResult("");
@@ -485,6 +507,7 @@ function stopExam() {
   setExamFinished(false);
   setExamScore(0);
   setExamAnswered(0);
+  setTimerRunning(false);
 }
   function nextExercise() {
     setAnswer("");
@@ -561,6 +584,10 @@ function stopExam() {
     <p>
       Question {examAnswered + 1} / 10 | Score : {examScore} / 10
     </p>
+    <p className="mt-2 text-xl font-bold">
+  ⏱️ {Math.floor(timeLeft / 60)}:
+  {(timeLeft % 60).toString().padStart(2, "0")}
+</p>
   </div>
 )}
           <div className="flex justify-between mb-4">
