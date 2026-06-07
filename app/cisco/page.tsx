@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../../lib/firebase";
 
 type Exercise = {
   title: string;
@@ -442,7 +444,30 @@ useEffect(() => {
 
   return () => clearInterval(timer);
 }, [timerRunning]);
+useEffect(() => {
+  async function loadProgress() {
+    try {
+      const docRef = doc(db, "users", "test-user");
+      const docSnap = await getDoc(docRef);
 
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+
+        setXp(data.xp || 0);
+        setCorrectAnswers(data.correctAnswers || 0);
+        setStreak(data.streak || 0);
+        setBestStreak(data.bestStreak || 0);
+        setCompletedExams(data.completedExams || 0);
+        setPassedExams(data.passedExams || 0);
+        setBestExamScore(data.bestExamScore || 0);
+      }
+    } catch (error) {
+      console.error("Erreur chargement :", error);
+    }
+  }
+
+  loadProgress();
+}, []);
   const exercises =
     selectedTheme === "extended" ? extendedAclExercises : standardAclExercises;
 
@@ -474,8 +499,27 @@ function finishExam(finalScore: number) {
   if (bonus > 0) {
     setXp(xp + bonus);
   }
+  saveProgress();
 }
-
+async function saveProgress() {
+  try {
+    await setDoc(
+      doc(db, "users", "test-user"),
+      {
+        xp,
+        correctAnswers,
+        streak,
+        bestStreak,
+        completedExams,
+        passedExams,
+        bestExamScore,
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Erreur sauvegarde :", error);
+  }
+}
   function checkAnswer() {
     const normalized = answer.toLowerCase();
 
