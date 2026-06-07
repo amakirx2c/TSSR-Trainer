@@ -421,6 +421,10 @@ const [examScore, setExamScore] = useState(0);
 const [examAnswered, setExamAnswered] = useState(0);
 const [examFinished, setExamFinished] = useState(false);
 const [timeLeft, setTimeLeft] = useState(900);
+const [examBonus, setExamBonus] = useState(0);
+const [completedExams, setCompletedExams] = useState(0);
+const [passedExams, setPassedExams] = useState(0);
+const [bestExamScore, setBestExamScore] = useState(0);
 const [timerRunning, setTimerRunning] = useState(false);
 useEffect(() => {
   if (!timerRunning) return;
@@ -428,10 +432,9 @@ useEffect(() => {
   const timer = setInterval(() => {
     setTimeLeft((prev) => {
       if (prev <= 1) {
-        setTimerRunning(false);
-        setExamFinished(true);
-        return 0;
-      }
+  finishExam(examScore);
+  return 0;
+}
 
       return prev - 1;
     });
@@ -444,6 +447,34 @@ useEffect(() => {
     selectedTheme === "extended" ? extendedAclExercises : standardAclExercises;
 
   const exercise = exercises[currentIndex];
+  function calculateExamBonus(score: number) {
+  if (score === 10) return 100;
+  if (score === 9) return 75;
+  if (score === 8) return 50;
+  if (score === 7) return 25;
+  return 0;
+}
+
+function finishExam(finalScore: number) {
+  const bonus = calculateExamBonus(finalScore);
+
+  setExamFinished(true);
+  setTimerRunning(false);
+  setExamBonus(bonus);
+  setCompletedExams(completedExams + 1);
+
+  if (finalScore >= 7) {
+    setPassedExams(passedExams + 1);
+  }
+
+  if (finalScore > bestExamScore) {
+    setBestExamScore(finalScore);
+  }
+
+  if (bonus > 0) {
+    setXp(xp + bonus);
+  }
+}
 
   function checkAnswer() {
     const normalized = answer.toLowerCase();
@@ -477,9 +508,9 @@ useEffect(() => {
 
   setExamAnswered(newAnswered);
 
-  if (newAnswered >= 10) {
-  setExamFinished(true);
-  setTimerRunning(false);
+if (newAnswered >= 10) {
+  const finalScore = isCorrect ? examScore + 1 : examScore;
+  finishExam(finalScore);
 }
 }
   }
@@ -490,6 +521,7 @@ function startExam() {
   setExamFinished(false);
   setTimeLeft(900);
 setTimerRunning(true);
+setExamBonus(0);
 
   setAnswer("");
   setResult("");
@@ -541,6 +573,17 @@ function stopExam() {
             <div className="bg-slate-800 border border-slate-700 px-5 py-3 rounded-xl">🏅 Badge : <strong>{getBadge(correctAnswers)}</strong></div>
             <div className="bg-slate-800 border border-slate-700 px-5 py-3 rounded-xl">🔥 Série : <strong>{streak}</strong></div>
             <div className="bg-slate-800 border border-slate-700 px-5 py-3 rounded-xl">👑 Meilleure série : <strong>{bestStreak}</strong></div>
+            <div className="bg-slate-800 border border-slate-700 px-5 py-3 rounded-xl">
+  🎯 Examens : <strong>{completedExams}</strong>
+</div>
+
+<div className="bg-slate-800 border border-slate-700 px-5 py-3 rounded-xl">
+  ✅ Réussis : <strong>{passedExams}</strong>
+</div>
+
+<div className="bg-slate-800 border border-slate-700 px-5 py-3 rounded-xl">
+  🏆 Meilleur score : <strong>{bestExamScore}/10</strong>
+</div>
           </div>
         </header>
 
@@ -587,6 +630,12 @@ function stopExam() {
     <p className="mt-2 text-xl font-bold">
   ⏱️ {Math.floor(timeLeft / 60)}:
   {(timeLeft % 60).toString().padStart(2, "0")}
+  <button
+  onClick={stopExam}
+  className="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold"
+>
+  ❌ Quitter l'examen
+</button>
 </p>
   </div>
 )}
@@ -611,7 +660,14 @@ function stopExam() {
 
           <div className="flex gap-4 mt-4 flex-wrap justify-center">
             <button onClick={checkAnswer} className="bg-blue-600 px-6 py-3 rounded-lg font-semibold">Vérifier</button>
-            <button onClick={() => setShowCorrection(!showCorrection)} className="bg-amber-600 px-6 py-3 rounded-lg font-semibold">Voir la correction</button>
+            {!examMode && (
+  <button
+    onClick={() => setShowCorrection(!showCorrection)}
+    className="bg-amber-600 px-6 py-3 rounded-lg font-semibold"
+  >
+    Voir la correction
+  </button>
+)}
             <button onClick={nextExercise} className="bg-slate-600 px-6 py-3 rounded-lg font-semibold">Question suivante</button>
           </div>
 
@@ -627,6 +683,9 @@ function stopExam() {
     <p className="text-xl mb-2">
       Score : {examScore} / 10
     </p>
+    <p className="text-xl mb-2 text-yellow-400 font-bold">
+  🎁 Bonus XP : +{examBonus}
+</p>
 
     <p className="text-xl mb-4">
       {examScore >= 7 ? "✅ Examen réussi" : "❌ Examen échoué"}
