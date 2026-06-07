@@ -499,8 +499,10 @@ function finishExam(finalScore: number) {
   if (bonus > 0) {
     setXp(xp + bonus);
   }
+
   saveProgress();
 }
+
 async function saveProgress() {
   try {
     await setDoc(
