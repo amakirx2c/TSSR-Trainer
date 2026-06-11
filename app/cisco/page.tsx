@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
+import CiscoToolkit from "./toolkit";
 
 type Exercise = {
   title: string;
@@ -757,6 +758,7 @@ function stopExam() {
             </div>
           )}
         </section>
+        <CiscoToolkit />
       </div>
     </main>
   );

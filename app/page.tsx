@@ -60,6 +60,12 @@ export default function Home() {
 </Link>
             <button className="bg-green-600 px-6 py-3 rounded-lg">Linux</button>
             <button className="bg-purple-600 px-6 py-3 rounded-lg">Windows</button>
+            <Link
+  href="/toolkit"
+  className="bg-orange-600 px-6 py-3 rounded-lg"
+>
+  Toolkit
+</Link>
           </div>
 
           <button
