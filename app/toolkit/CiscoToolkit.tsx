@@ -11,8 +11,26 @@ export default function CiscoToolkit() {
   const [destination, setDestination] = useState("192.168.100.10");
   const [port, setPort] = useState("80");
   const [cidr, setCidr] = useState("/24");
+  const [stdAclNumber, setStdAclNumber] = useState("10");
+const [stdAction, setStdAction] = useState("permit");
+const [stdNetwork, setStdNetwork] = useState("192.168.10.0");
+const [stdWildcard, setStdWildcard] = useState("0.0.0.255");
+const [natAclNumber, setNatAclNumber] = useState("1");
+const [natNetwork, setNatNetwork] = useState("192.168.10.0");
+const [natWildcard, setNatWildcard] = useState("0.0.0.255");
+const [natOutsideInterface, setNatOutsideInterface] = useState("GigabitEthernet0/1");
+const [ospfProcess, setOspfProcess] = useState("1");
+const [ospfNetwork, setOspfNetwork] = useState("192.168.10.0");
+const [ospfWildcard, setOspfWildcard] = useState("0.0.0.255");
+const [ospfArea, setOspfArea] = useState("0");
 
   const generatedAcl = `access-list ${aclNumber} ${action} ${protocol} ${source} ${sourceWildcard} host ${destination} eq ${port}`;
+  const generatedStandardAcl =
+  `access-list ${stdAclNumber} ${stdAction} ${stdNetwork} ${stdWildcard}`;
+  const generatedNatPat = `access-list ${natAclNumber} permit ${natNetwork} ${natWildcard}
+ip nat inside source list ${natAclNumber} interface ${natOutsideInterface} overload`;
+const generatedOspf = `router ospf ${ospfProcess}
+network ${ospfNetwork} ${ospfWildcard} area ${ospfArea}`;
 const wildcardMap: Record<string, string> = {
   "/24": "0.0.0.255",
   "/25": "0.0.0.127",
@@ -46,6 +64,18 @@ const hostsMap: Record<string, string> = {
     await navigator.clipboard.writeText(generatedAcl);
     alert("Commande ACL copiée !");
   }
+  async function copyStandardAcl() {
+  await navigator.clipboard.writeText(generatedStandardAcl);
+  alert("Commande ACL standard copiée !");
+}
+async function copyNatPat() {
+  await navigator.clipboard.writeText(generatedNatPat);
+  alert("Configuration NAT/PAT copiée !");
+}
+async function copyOspf() {
+  await navigator.clipboard.writeText(generatedOspf);
+  alert("Configuration OSPF copiée !");
+}
 
   return (
     <section className="bg-slate-800 p-8 rounded-2xl border border-slate-700 mx-auto max-w-3xl mt-8">
@@ -214,6 +244,221 @@ const hostsMap: Record<string, string> = {
     <p className="mt-2">
       <strong>Hôtes utilisables :</strong> {hostsMap[cidr]}
     </p>
+  </div>
+</div>
+<div className="mt-10 border-t border-slate-700 pt-8">
+  <h2 className="text-3xl font-bold mb-4">
+    🛡️ ACL Standard Generator
+  </h2>
+  <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6">
+  <h3 className="text-xl font-bold mb-2">Exemple concret</h3>
+  <p className="text-slate-300">
+    Bloquer le réseau <strong>192.168.20.0/24</strong> avec une ACL standard.
+  </p>
+  <p className="text-slate-400 mt-2">
+    Résultat : access-list 10 deny 192.168.20.0 0.0.0.255
+  </p>
+</div>
+
+  <p className="text-slate-300 mb-6">
+    Génère rapidement une ACL standard Cisco.
+  </p>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <input
+      value={stdAclNumber}
+      onChange={(e) => setStdAclNumber(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Numéro ACL"
+    />
+
+    <select
+      value={stdAction}
+      onChange={(e) => setStdAction(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+    >
+      <option value="permit">permit</option>
+      <option value="deny">deny</option>
+    </select>
+
+    <input
+      value={stdNetwork}
+      onChange={(e) => setStdNetwork(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Réseau"
+    />
+
+    <input
+      value={stdWildcard}
+      onChange={(e) => setStdWildcard(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Wildcard"
+    />
+
+  </div>
+
+  <div className="mt-6 bg-black text-green-400 p-4 rounded-lg font-mono">
+    {generatedStandardAcl}
+  </div>
+  <button
+  onClick={copyStandardAcl}
+  className="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold"
+>
+  📋 Copier l'ACL standard
+</button>
+</div>
+<div className="mt-10 border-t border-slate-700 pt-8">
+  <h2 className="text-3xl font-bold mb-4">
+    🔥 NAT/PAT Generator
+  </h2>
+
+  <p className="text-slate-300 mb-6">
+    Génère une configuration NAT overload classique pour donner accès à Internet à un réseau LAN.
+  </p>
+
+  <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6">
+    <h3 className="text-xl font-bold mb-2">Exemple concret</h3>
+    <p className="text-slate-300">
+      Autoriser le réseau <strong>192.168.10.0/24</strong> à sortir vers Internet via
+      l'interface <strong>GigabitEthernet0/1</strong>.
+    </p>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <label className="space-y-2">
+      <span className="font-semibold">Numéro ACL NAT</span>
+      <p className="text-sm text-slate-400">
+        Souvent 1 pour une ACL standard simple.
+      </p>
+      <input
+        value={natAclNumber}
+        onChange={(e) => setNatAclNumber(e.target.value)}
+        className="w-full p-3 rounded bg-white text-black"
+        placeholder="Ex : 1"
+      />
+    </label>
+
+    <label className="space-y-2">
+      <span className="font-semibold">Réseau LAN</span>
+      <p className="text-sm text-slate-400">
+        Réseau interne autorisé à sortir vers Internet.
+      </p>
+      <input
+        value={natNetwork}
+        onChange={(e) => setNatNetwork(e.target.value)}
+        className="w-full p-3 rounded bg-white text-black"
+        placeholder="Ex : 192.168.10.0"
+      />
+    </label>
+
+    <label className="space-y-2">
+      <span className="font-semibold">Wildcard LAN</span>
+      <p className="text-sm text-slate-400">
+        Exemple : 0.0.0.255 pour un /24.
+      </p>
+      <input
+        value={natWildcard}
+        onChange={(e) => setNatWildcard(e.target.value)}
+        className="w-full p-3 rounded bg-white text-black"
+        placeholder="Ex : 0.0.0.255"
+      />
+    </label>
+
+    <label className="space-y-2">
+      <span className="font-semibold">Interface WAN</span>
+      <p className="text-sm text-slate-400">
+        Interface connectée vers Internet ou le routeur opérateur.
+      </p>
+      <input
+        value={natOutsideInterface}
+        onChange={(e) => setNatOutsideInterface(e.target.value)}
+        className="w-full p-3 rounded bg-white text-black"
+        placeholder="Ex : GigabitEthernet0/1"
+      />
+    </label>
+  </div>
+
+  <div className="mt-6">
+    <h3 className="text-xl font-bold mb-2">Configuration générée</h3>
+
+    <pre className="bg-black text-green-400 p-4 rounded-lg font-mono overflow-x-auto whitespace-pre-wrap">
+      {generatedNatPat}
+    </pre>
+
+    <button
+      onClick={copyNatPat}
+      className="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold"
+    >
+      📋 Copier la configuration NAT/PAT
+    </button>
+  </div>
+</div>
+<div className="mt-10 border-t border-slate-700 pt-8">
+  <h2 className="text-3xl font-bold mb-4">
+    🌐 OSPF Generator
+  </h2>
+
+  <p className="text-slate-300 mb-6">
+    Génère automatiquement la configuration OSPF de base.
+  </p>
+
+  <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6">
+    <h3 className="text-xl font-bold mb-2">Exemple concret</h3>
+
+    <p className="text-slate-300">
+      Publier le réseau <strong>192.168.10.0/24</strong>
+      dans l'<strong>Area 0</strong>.
+    </p>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <input
+      value={ospfProcess}
+      onChange={(e) => setOspfProcess(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Process ID"
+    />
+
+    <input
+      value={ospfArea}
+      onChange={(e) => setOspfArea(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Area"
+    />
+
+    <input
+      value={ospfNetwork}
+      onChange={(e) => setOspfNetwork(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Network"
+    />
+
+    <input
+      value={ospfWildcard}
+      onChange={(e) => setOspfWildcard(e.target.value)}
+      className="p-3 rounded bg-white text-black"
+      placeholder="Wildcard"
+    />
+
+  </div>
+
+  <div className="mt-6">
+    <h3 className="text-xl font-bold mb-2">
+      Configuration générée
+    </h3>
+
+    <pre className="bg-black text-green-400 p-4 rounded-lg font-mono overflow-x-auto whitespace-pre-wrap">
+      {generatedOspf}
+    </pre>
+
+    <button
+      onClick={copyOspf}
+      className="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold"
+    >
+      📋 Copier la configuration OSPF
+    </button>
   </div>
 </div>
     </section>
