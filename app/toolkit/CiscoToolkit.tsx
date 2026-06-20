@@ -23,6 +23,7 @@ const [ospfProcess, setOspfProcess] = useState("1");
 const [ospfNetwork, setOspfNetwork] = useState("192.168.10.0");
 const [ospfWildcard, setOspfWildcard] = useState("0.0.0.255");
 const [ospfArea, setOspfArea] = useState("0");
+const [vlsmMask, setVlsmMask] = useState("/24");
 
   const generatedAcl = `access-list ${aclNumber} ${action} ${protocol} ${source} ${sourceWildcard} host ${destination} eq ${port}`;
   const generatedStandardAcl =
@@ -31,6 +32,15 @@ const [ospfArea, setOspfArea] = useState("0");
 ip nat inside source list ${natAclNumber} interface ${natOutsideInterface} overload`;
 const generatedOspf = `router ospf ${ospfProcess}
 network ${ospfNetwork} ${ospfWildcard} area ${ospfArea}`;
+const blockSizeMap: Record<string, string> = {
+  "/24": "256",
+  "/25": "128",
+  "/26": "64",
+  "/27": "32",
+  "/28": "16",
+  "/29": "8",
+  "/30": "4",
+};
 const wildcardMap: Record<string, string> = {
   "/24": "0.0.0.255",
   "/25": "0.0.0.127",
@@ -459,6 +469,47 @@ async function copyOspf() {
     >
       📋 Copier la configuration OSPF
     </button>
+  </div>
+</div>
+<div className="mt-10 border-t border-slate-700 pt-8">
+  <h2 className="text-3xl font-bold mb-4">
+    🧮 VLSM Calculator
+  </h2>
+
+  <p className="text-slate-300 mb-6">
+    Affiche rapidement les informations utiles pour le subnetting.
+  </p>
+
+  <select
+    value={vlsmMask}
+    onChange={(e) => setVlsmMask(e.target.value)}
+    className="p-3 rounded bg-white text-black"
+  >
+    <option value="/24">/24</option>
+    <option value="/25">/25</option>
+    <option value="/26">/26</option>
+    <option value="/27">/27</option>
+    <option value="/28">/28</option>
+    <option value="/29">/29</option>
+    <option value="/30">/30</option>
+  </select>
+
+  <div className="mt-6 bg-slate-900 border border-slate-700 p-5 rounded-xl">
+    <p>
+      <strong>Masque :</strong> {maskMap[vlsmMask]}
+    </p>
+
+    <p className="mt-2">
+      <strong>Wildcard :</strong> {wildcardMap[vlsmMask]}
+    </p>
+
+    <p className="mt-2">
+      <strong>Hôtes utilisables :</strong> {hostsMap[vlsmMask]}
+    </p>
+
+    <p className="mt-2">
+      <strong>Taille du bloc :</strong> {blockSizeMap[vlsmMask]}
+    </p>
   </div>
 </div>
     </section>
