@@ -24,6 +24,7 @@ const [ospfNetwork, setOspfNetwork] = useState("192.168.10.0");
 const [ospfWildcard, setOspfWildcard] = useState("0.0.0.255");
 const [ospfArea, setOspfArea] = useState("0");
 const [vlsmMask, setVlsmMask] = useState("/24");
+const [activeTool, setActiveTool] = useState("extendedAcl");
 
   const generatedAcl = `access-list ${aclNumber} ${action} ${protocol} ${source} ${sourceWildcard} host ${destination} eq ${port}`;
   const generatedStandardAcl =
@@ -89,11 +90,58 @@ async function copyOspf() {
 
   return (
     <section className="bg-slate-800 p-8 rounded-2xl border border-slate-700 mx-auto max-w-3xl mt-8">
-      <h2 className="text-3xl font-bold mb-4">📡 Générateur ACL Cisco</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+  <button
+    onClick={() => setActiveTool("extendedAcl")}
+    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg"
+  >
+    📡 ACL Étendue
+  </button>
 
-      <p className="text-slate-300 mb-6">
-        Remplis les champs ci-dessous pour générer automatiquement une syntaxe ACL étendue Cisco.
-      </p>
+  <button
+    onClick={() => setActiveTool("standardAcl")}
+    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg"
+  >
+    🛡️ ACL Standard
+  </button>
+
+  <button
+    onClick={() => setActiveTool("wildcard")}
+    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg"
+  >
+    🧮 Wildcard
+  </button>
+
+  <button
+    onClick={() => setActiveTool("nat")}
+    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg"
+  >
+    🔥 NAT/PAT
+  </button>
+
+  <button
+    onClick={() => setActiveTool("ospf")}
+    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg"
+  >
+    🌐 OSPF
+  </button>
+
+  <button
+    onClick={() => setActiveTool("vlsm")}
+    className="bg-slate-700 hover:bg-slate-600 p-3 rounded-lg"
+  >
+    📏 VLSM
+  </button>
+</div>
+{activeTool === "extendedAcl" && (
+  <div>
+    <h2 className="text-3xl font-bold mb-4">📡 Générateur ACL Cisco</h2>
+
+    <p className="text-slate-300 mb-6">
+      Remplis les champs ci-dessous pour générer automatiquement une syntaxe ACL étendue Cisco.
+    </p>
+  </div>
+)}
 
       <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6">
         <h3 className="text-xl font-bold mb-2">Exemple concret</h3>
@@ -219,10 +267,11 @@ async function copyOspf() {
           📋 Copier la commande
         </button>
       </div>
-      <div className="mt-10 border-t border-slate-700 pt-8">
-  <h2 className="text-3xl font-bold mb-4">
-    🧮 Wildcard Calculator
-  </h2>
+ {activeTool === "wildcard" && (
+  <div className="mt-10 border-t border-slate-700 pt-8">
+    <h2 className="text-3xl font-bold mb-4">
+      🧮 Wildcard Calculator
+    </h2>
 
   <p className="text-slate-300 mb-4">
     Choisis un CIDR pour obtenir rapidement le masque, la wildcard et le nombre d'hôtes.
@@ -254,12 +303,15 @@ async function copyOspf() {
     <p className="mt-2">
       <strong>Hôtes utilisables :</strong> {hostsMap[cidr]}
     </p>
-  </div>
+   </div>
 </div>
-<div className="mt-10 border-t border-slate-700 pt-8">
-  <h2 className="text-3xl font-bold mb-4">
-    🛡️ ACL Standard Generator
-  </h2>
+)}
+
+{activeTool === "standardAcl" && (
+  <div className="mt-10 border-t border-slate-700 pt-8">
+    <h2 className="text-3xl font-bold mb-4">
+      🛡️ ACL Standard Generator
+    </h2>
   <div className="bg-slate-900 border border-slate-700 p-4 rounded-xl mb-6">
   <h3 className="text-xl font-bold mb-2">Exemple concret</h3>
   <p className="text-slate-300">
@@ -318,7 +370,9 @@ async function copyOspf() {
   📋 Copier l'ACL standard
 </button>
 </div>
-<div className="mt-10 border-t border-slate-700 pt-8">
+)}
+{activeTool === "nat" && (
+  <div className="mt-10 border-t border-slate-700 pt-8">
   <h2 className="text-3xl font-bold mb-4">
     🔥 NAT/PAT Generator
   </h2>
@@ -404,7 +458,9 @@ async function copyOspf() {
     </button>
   </div>
 </div>
-<div className="mt-10 border-t border-slate-700 pt-8">
+)}
+{activeTool === "ospf" && (
+  <div className="mt-10 border-t border-slate-700 pt-8">
   <h2 className="text-3xl font-bold mb-4">
     🌐 OSPF Generator
   </h2>
@@ -471,7 +527,9 @@ async function copyOspf() {
     </button>
   </div>
 </div>
-<div className="mt-10 border-t border-slate-700 pt-8">
+)}
+{activeTool === "vlsm" && (
+  <div className="mt-10 border-t border-slate-700 pt-8">
   <h2 className="text-3xl font-bold mb-4">
     🧮 VLSM Calculator
   </h2>
@@ -512,6 +570,7 @@ async function copyOspf() {
     </p>
   </div>
 </div>
+)}
     </section>
   );
 }
